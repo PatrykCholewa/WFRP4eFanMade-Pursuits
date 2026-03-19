@@ -26,6 +26,6 @@
   "styles": [
     "styles/module.css"
   ],
-  "manifest": "",
+  "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/refs/heads/master/module.json",
   "download": ""
 }
