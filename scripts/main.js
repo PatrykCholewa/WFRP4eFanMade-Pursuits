@@ -69,11 +69,13 @@ async function moveTokenToIndex(scene, tokenDoc, index) {
   await tokenDoc.update({ x, y });
 }
 
-async function syncParticipantFromToken(tokenDoc) {
+async function syncParticipantFromToken(tokenDoc, change = {}) {
   const tracker = getTrackerData();
   const part = tracker.participants.find(p => p.sceneId === tokenDoc.parent?.id && p.tokenId === tokenDoc.id);
   if (!part) return;
-  part.position = getNearestBoardIndex(tokenDoc.x, tokenDoc.y) + 1;
+  const nextX = change.x ?? tokenDoc.x;
+  const nextY = change.y ?? tokenDoc.y;
+  part.position = getNearestBoardIndex(nextX, nextY) + 1;
   await setTrackerData(tracker);
   if (ui.wfrpChaseTracker?.rendered) ui.wfrpChaseTracker.render(true);
 }
@@ -254,7 +256,7 @@ Hooks.on("updateToken", async (tokenDoc, change, _options, userId) => {
   if (userId !== game.user.id) return;
   if ((change.x === undefined) && (change.y === undefined)) return;
   if (tokenDoc.parent?.name !== BOARD_SCENE_NAME) return;
-  await syncParticipantFromToken(tokenDoc);
+  await syncParticipantFromToken(tokenDoc, change);
 });
 
 Hooks.once("ready", async () => {

@@ -2,7 +2,7 @@
   "id": "wfrp4e-pod-bronia-poscigi",
   "title": "WFRP4e Fan - Poscigi",
   "description": "Plansza i tracker poscigu dla WFRP 4e inspirowane dodatkiem Pod Bronia.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -27,5 +27,5 @@
     "styles/module.css"
   ],
   "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/refs/heads/master/module.json",
-  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/archive/refs/tags/v0.2.1.zip"
+  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/archive/refs/tags/v0.2.3.zip"
 }
