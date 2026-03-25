@@ -2,21 +2,28 @@
   "id": "wfrp4e-pod-bronia-poscigi",
   "title": "WFRP4e Fan - Poscigi",
   "description": "Plansza i tracker poscigu dla WFRP 4e inspirowane dodatkiem Pod Bronia.",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
   },
   "authors": [
     {
-      "name": "OpenAI"
+      "name": "Patryk Cholewa",
+      "discord": "lordcalka",
+      "url": "https://github.com/PatrykCholewa"
     }
   ],
   "relationships": {
     "systems": [
       {
         "id": "wfrp4e",
-        "type": "system"
+        "type": "system",
+        "manifest": "https://raw.githubusercontent.com/moo-man/WFRP4e-FoundryVTT/refs/heads/master/system.json",
+        "compatibility": {
+          "minimum" : "2.9.1",
+          "verified": "2.9.1"
+        }
       }
     ]
   },
@@ -26,6 +33,24 @@
   "styles": [
     "styles/module.css"
   ],
+  "packs": [
+    {
+      "name": "macros",
+      "label": "Makra",
+      "path": "./packs/macros.db",
+      "type": "Macro"
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "Calkowite Pomoce",
+      "sorting": "a",
+      "color": "#3B88FF",
+      "packs": [
+        "macros"
+      ]
+    }
+  ],
   "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/refs/heads/master/module.json",
-  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/archive/refs/tags/v0.2.3.zip"
+  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/archive/refs/tags/v0.3.0.zip"
 }

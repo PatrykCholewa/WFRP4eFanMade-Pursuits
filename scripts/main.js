@@ -1,9 +1,10 @@
+import { initializeRollRequestSupport } from "./roll-requests.js";
+
 const MODULE_ID = "wfrp4e-pod-bronia-poscigi";
 const BOARD_SCENE_NAME = "Plansza poscigu";
 const BOARD_WIDTH = 2200;
 const BOARD_HEIGHT = 1400;
 const TOKEN_SIZE = 80;
-const TRACKER_FLAG = `${MODULE_ID}.tracker`;
 const BOARD_POSITIONS = [
   { x: 1100, y: 240 }, { x: 1297, y: 256 }, { x: 1480, y: 302 }, { x: 1634, y: 375 },
   { x: 1748, y: 470 }, { x: 1813, y: 581 }, { x: 1830, y: 700 }, { x: 1813, y: 819 },
@@ -39,6 +40,16 @@ function getNearestBoardIndex(x, y) {
 function coordsForIndex(index) {
   const pos = BOARD_POSITIONS[((index % BOARD_POSITIONS.length) + BOARD_POSITIONS.length) % BOARD_POSITIONS.length];
   return { x: pos.x - TOKEN_SIZE / 2, y: pos.y - TOKEN_SIZE / 2 };
+}
+
+function getParticipantActor(participant) {
+  if (participant?.actorId) {
+    const actor = game.actors?.get(participant.actorId);
+    if (actor) return actor;
+  }
+
+  const scene = game.scenes?.get(participant?.sceneId);
+  return scene?.tokens?.get(participant?.tokenId)?.actor ?? null;
 }
 
 async function ensureBoardScene() {
@@ -199,8 +210,10 @@ async function openTracker() {
   ui.wfrpChaseTracker.render(true);
 }
 
+const rollRequests = initializeRollRequestSupport({ moduleId: MODULE_ID, getTrackerData, getParticipantActor });
+
 Hooks.once("init", async () => {
-  game.wfrpChase = { openBoard, openTracker, ensureBoardScene };
+  game.wfrpChase = { openBoard, openTracker, openRollRequestDialog: rollRequests.openRollRequestDialog, ensureBoardScene };
   await game.settings.register(MODULE_ID, "tracker", {
     name: "Tracker poscigu",
     scope: "world",
@@ -241,14 +254,6 @@ Hooks.on("getSceneControlButtons", (controls) => {
     icon: "fas fa-flag-checkered",
     button: true,
     onClick: () => game.wfrpChase.openBoard()
-  });
-
-  addSceneControlTool(tokenControls, {
-    name: "wfrp-chase-tracker",
-    title: "Tracker poscigu",
-    icon: "fas fa-route",
-    button: true,
-    onClick: () => game.wfrpChase.openTracker()
   });
 });
 
