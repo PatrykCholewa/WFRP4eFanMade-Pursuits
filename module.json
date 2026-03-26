@@ -21,8 +21,8 @@
         "type": "system",
         "manifest": "https://raw.githubusercontent.com/moo-man/WFRP4e-FoundryVTT/refs/heads/master/system.json",
         "compatibility": {
-          "minimum" : "2.9.1",
-          "verified": "2.9.1"
+          "minimum" : "9.4.1",
+          "verified": "9.4.1"
         }
       }
     ]
