@@ -1,0 +1,34 @@
+#sta-launch {position:fixed;bottom:12px;right:330px;z-index:70;width:40px;height:40px;border:1px solid #baa678;border-radius:50%;background:#20252d;color:#f3dca9;font-size:24px;box-shadow:0 3px 15px #0008;cursor:pointer}
+#sta-panel {position:fixed;top:9vh;left:50%;transform:translateX(-50%);width:610px;max-width:94vw;max-height:82vh;z-index:90;color:#eee9df;background:#20252d;border:1px solid #7e725a;border-radius:12px;box-shadow:0 18px 70px #000a;font:14px/1.45 Arial,sans-serif;overflow:hidden}
+#sta-panel[hidden] {display:none}
+#sta-panel header {display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#171c23;border-bottom:1px solid #41444b}
+#sta-panel header strong {font-size:20px;color:#f2d7a0}
+#sta-panel header small {display:block;color:#adafae}
+#sta-panel .sta-body {padding:16px 20px;overflow:auto;max-height:calc(82vh - 78px)}
+#sta-panel button {height:auto;min-height:32px;border:1px solid #60616a;border-radius:6px;background:#303743;color:#f5eee2;padding:6px 10px;font:inherit;cursor:pointer;line-height:1.4;box-shadow:none}
+#sta-panel button:hover:not(:disabled) {background:#424c5c;border-color:#d0ae70}
+#sta-panel button:disabled {opacity:.45;cursor:default}
+#sta-panel button:focus-visible, #sta-panel input:focus-visible, #sta-panel select:focus-visible {outline:2px solid #e2bb73;outline-offset:2px}
+#sta-panel .sta-time {display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+#sta-panel [data-clock] {font-size:24px;font-variant-numeric:tabular-nums;color:#f2d7a0;white-space:nowrap}
+#sta-panel [data-status] {font-size:12px;color:#bfc4ca;text-align:right;overflow-wrap:anywhere}
+#sta-panel input[type=range] {width:100%;margin:8px 0;accent-color:#d5ad70}
+#sta-panel .sta-transport {display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+#sta-panel .sta-note {font-size:12px;color:#b6b8be;margin:10px 0}
+#sta-panel .sta-tracks {display:grid;gap:8px;margin:14px 0;max-height:230px;overflow:auto}
+#sta-panel .sta-track {display:flex;gap:6px}
+#sta-panel .sta-track>button:first-child {flex:1;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px}
+#sta-panel .sta-track span {overflow-wrap:anywhere}
+#sta-panel .sta-track small {color:#c3c0b9;white-space:nowrap}
+#sta-panel .sta-track.selected>button:first-child {border-color:#d5ad70;background:#484031}
+#sta-panel .sta-remove {flex:0 0 32px}
+#sta-panel .sta-volumes {display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#sta-panel label {display:block;margin:8px 0;color:#ddd8cf}
+#sta-panel input[type=text], #sta-panel input[type=number], #sta-panel select {width:100%;height:34px;border:1px solid #636571;border-radius:5px;background:#151a21;color:#eee9df;padding:4px 7px;font:inherit}
+#sta-panel input[type=checkbox] {vertical-align:middle;accent-color:#d5ad70}
+#sta-panel summary {cursor:pointer;color:#f2d7a0;padding:10px 0;border-top:1px solid #45464b;margin-top:12px}
+#sta-panel .sta-path, #sta-panel .sta-import {display:flex;gap:6px;align-items:center}
+#sta-panel .sta-path input, #sta-panel .sta-import select {flex:1;min-width:0}
+#sta-panel .sta-path button, #sta-panel .sta-import button {flex-shrink:0}
+#sta-panel form {padding:8px 0;border-bottom:1px solid #45464b;margin-bottom:12px}
+@media(max-width:650px) {#sta-launch {right:12px;bottom:60px} #sta-panel {top:4vh;max-height:92vh} #sta-panel .sta-body {max-height:calc(92vh - 78px)} #sta-panel .sta-volumes {grid-template-columns:1fr} #sta-panel .sta-path {flex-wrap:wrap}}
