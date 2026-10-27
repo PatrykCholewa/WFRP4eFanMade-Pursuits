@@ -1,8 +1,10 @@
 import { migrateLegacyData } from "../migration.js";
 import {ID, initialState, transition, position, lengthOf, formatTime, validPath, copy, clamp} from './core.js';
+import {bindSeekControls} from './seek-controls.js';
 import {TimelineEngine} from './engine.js';
 
-let engine, state, panel, controllerQueue = Promise.resolve(), message = 'Gotowy', lastPreload = 0;
+const panels = new Set();
+let engine, state, controllerQueue = Promise.resolve(), message = 'Gotowy', lastPreload = 0;
 const clock = () => game.time.serverTime;
 const controlsAllowed = () => game.user.isGM && game.users.activeGM?.id === game.user.id;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -38,39 +40,44 @@ function command(action) {
   controllerQueue = result;
   return result;
 }
-function launchButton() {
-  if (document.getElementById('sta-launch')) return;
-  const button = document.createElement('button');
-  button.id = 'sta-launch'; button.type = 'button'; button.textContent = '♫';
-  button.title = 'Wspólny czas — muzyka (Ctrl+Shift+M)';
-  button.setAttribute('aria-label', button.title);
-  button.addEventListener('click', open);
-  document.body.append(button);
-}
 function open() {
-  if (panel) { panel.hidden = false; refresh(); return; }
-  panel = document.createElement('section'); panel.id = 'sta-panel';
-  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Wspólny czas — przełącznik muzyki');
-  panel.innerHTML = `<header><div><strong>Wspólny czas</strong><small>Jedna ścieżka · jeden zegar</small></div><button type="button" data-action="close" title="Zamknij">✕</button></header>
-    <div class="sta-body"><div class="sta-time"><output data-clock>0:00</output><span data-status></span></div>
+  ui.playlists?.activate();
+  mount(ui.playlists?.element);
+}
+function mount(element) {
+  const root = element?.querySelector ? element : element?.[0];
+  if (!root) return;
+  for (const old of panels) if (!old.isConnected) panels.delete(old);
+  const existing = root.querySelector('.sta-sidebar');
+  if (existing) { panels.add(existing); refresh(); return; }
+  const panel = root.ownerDocument.createElement('section');
+  panel.className = 'sta-sidebar';
+  panel.setAttribute('aria-label', 'Muzyka — wspólny czas');
+  panel.innerHTML = `<header><strong>Wspólny czas</strong><small>Przełączanie utworów w synchronizacji</small></header>
+    <div class="sta-body"><div class="sta-import" data-import><select data-playlist aria-label="Playlista do synchronizacji"></select><button type="button" data-action="import" title="Dodaj utwory z wybranej playlisty do wspólnej osi czasu">Dodaj</button></div><div class="sta-time"><output data-clock>0:00</output><span data-status></span></div>
     <input type="range" data-seek min="0" max="1" step="0.1" value="0" aria-label="Pozycja odtwarzania">
+    <form data-jump class="sta-jump"><button type="button" data-action="back" title="Cofnij o 10 sekund">−10 s</button><input data-timestamp type="text" placeholder="13:12" aria-label="Przejdź do czasu (minuty:sekundy)" inputmode="text"><button type="submit">Przejdź</button><button type="button" data-action="forward" title="Przewiń o 10 sekund">+10 s</button></form>
     <div class="sta-transport"><button type="button" data-action="play">▶ Odtwórz</button><button type="button" data-action="pause">Ⅱ Pauza</button><button type="button" data-action="stop">■ Stop</button><button type="button" data-action="resync">↻ Synchronizuj u mnie</button></div>
     <p class="sta-note" data-authority></p><div data-tracks class="sta-tracks"></div>
     <div class="sta-volumes"><label>Głośność dla wszystkich <input data-master type="range" min="0" max="100" step="1"></label><label>Głośność tylko u mnie <input data-local type="range" min="0" max="100" step="1"></label></div>
     <details data-config><summary>Pliki i ustawienia</summary>
       <p class="sta-note">Lista plików jest edytowalna po naciśnięciu Stop. Wybierz plik przez przeglądarkę Foundry; możesz tam także wgrać plik z komputera.</p>
       <form data-add><label>Nazwa <input name="name" type="text" maxlength="100" placeholder="np. Eksploracja"></label><label>Plik audio <span class="sta-path"><input name="path" type="text" placeholder="worlds/moj-swiat/audio/utwor.ogg" required><button type="button" data-action="browse">Wybierz / wgraj</button></span></label><button type="submit">＋ Dodaj ścieżkę</button></form>
-      <div class="sta-import"><select data-playlist aria-label="Istniejąca playlista"></select><button type="button" data-action="import">Dodaj z playlisty</button></div>
       <form data-options><label><input name="loop" type="checkbox"> Zapętlaj wspólną oś czasu</label><label>Koniec osi (sekundy; 0 = najkrótszy plik)<input name="loopEnd" type="number" min="0" step="0.001"></label><label>Długość przejścia bez nakładania (ms)<input name="transitionMs" type="number" min="0" max="2000" step="10"></label><button type="submit">Zapisz ustawienia</button></form>
       <button type="button" data-action="preload">Wczytaj wszystkie pliki u połączonych graczy</button>
       <p class="sta-note">Całe nagrania są dekodowane do pamięci, aby dokładnie zapętlać wspólny zakres. Dłuższe końcówki są pomijane. Ścieżki mogą mieć różne długości; jednakowy czas nie wyrównuje melodii ani tempa.</p>
     </details><p class="sta-note">Ten odtwarzacz działa niezależnie od zwykłych playlist i Adaptive Audio. Zatrzymaj je, jeżeli nie chcesz dodatkowej muzyki.</p></div>`;
-  document.body.append(panel);
+  // The directory list is the scrollable native playlist area, including popouts.
+  const list = root.querySelector('.directory-list');
+  if (list) list.before(panel);
+  else (root.querySelector('.window-content') ?? root).append(panel);
+  panels.add(panel);
   panel.addEventListener('click', event => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
     const {action, id} = button.dataset;
-    void handle(action, id).catch(notice);
+    event.stopPropagation();
+    void handle(action, id, panel).catch(notice);
   });
   panel.querySelector('[data-add]').addEventListener('submit', event => {
     event.preventDefault();
@@ -81,7 +88,7 @@ function open() {
     event.preventDefault(); const data = new FormData(event.currentTarget);
     void command({type:'options', loop:data.has('loop'), loopEnd:Number(data.get('loopEnd')), transitionMs:Number(data.get('transitionMs'))}).catch(notice);
   });
-  panel.querySelector('[data-seek]').addEventListener('change', event => { void command({type:'seek', seconds:Number(event.target.value)}).catch(notice); });
+  bindSeekControls(panel, {position:() => position(state, clock()), length:() => lengthOf(state), seek:seconds => command({type:'seek', seconds}), notice});
   panel.querySelector('[data-master]').addEventListener('change', event => { void command({type:'volume', value:Number(event.target.value)/100}).catch(notice); });
   panel.querySelector('[data-local]').addEventListener('input', event => {
     const value = Number(event.target.value)/100;
@@ -89,11 +96,12 @@ function open() {
     if (engine.current) void engine.current.sound.fade(state.volume * value, {duration:30});
   });
   panel.querySelector('[data-local]').addEventListener('change', event => { void game.settings.set(ID, 'localVolume', Number(event.target.value)/100); });
-  panel.addEventListener('keydown', event => { if (event.key === 'Escape') { panel.hidden = true; event.stopPropagation(); } });
+  panel.addEventListener('keydown', event => event.stopPropagation());
+  panel.addEventListener('submit', event => event.stopPropagation());
   refresh();
 }
-async function handle(action, id) {
-  if (action === 'close') { panel.hidden = true; return; }
+async function handle(action, id, panel) {
+  if (action === 'back' || action === 'forward') return; // Bound by seek controls.
   if (action === 'resync') { engine.failed = false; await engine.accept(state); return; }
   if (action === 'browse') {
     if (!controlsAllowed()) return;
@@ -106,7 +114,8 @@ async function handle(action, id) {
   if (action === 'import') {
     const list = game.playlists.get(panel.querySelector('[data-playlist]').value);
     if (!list) throw new Error('Wybierz istniejącą playlistę.');
-    await addTracks(list.sounds.map(s => ({name:s.name, path:s.path}))); return;
+    await addTracks(list.sounds.map(s => ({name:s.name, path:s.path})));
+    await list.stopAll(); return;
   }
   if (action === 'select') { await command({type:'select', id}); return; }
   await command({type:action});
@@ -135,12 +144,17 @@ async function addTracks(inputs) {
   } finally { adding = false; }
 }
 function refresh() {
-  if (!panel || !state) return;
+  for (const panel of panels) refreshPanel(panel);
+}
+function refreshPanel(panel) {
+  if (!state) return;
   const gm = controlsAllowed(), stopped = state.status === 'stopped';
   panel.querySelector('[data-authority]').textContent = gm ? 'Wybierz wersję przyciskiem. Podczas pauzy wybór nie uruchamia odtwarzania.' :
     `Sterowanie: ${game.users.activeGM?.name ?? 'brak aktywnego MG'}. Możesz regulować własną głośność.`;
   panel.querySelector('[data-tracks]').innerHTML = state.tracks.length ? state.tracks.map(track =>
     `<div class="sta-track ${track.id === state.selected ? 'selected' : ''}"><button type="button" data-action="select" data-id="${esc(track.id)}" ${gm?'':'disabled'} aria-pressed="${track.id === state.selected}"><span>${esc(track.name)}</span><small>${formatTime(track.duration)} ${track.id === state.selected?'· wybrana':''}</small></button>${gm?`<button class="sta-remove" type="button" data-action="remove" data-id="${esc(track.id)}" title="Usuń z listy (nie usuwa pliku)" ${stopped?'':'disabled'}>✕</button>`:''}</div>`).join('') : '<p>Dodaj pierwszą ścieżkę w sekcji „Pliki i ustawienia”.</p>';
+  for (const element of panel.querySelectorAll('[data-jump] input, [data-jump] button')) element.disabled = !gm || !state.tracks.length;
+  for (const element of panel.querySelectorAll('[data-import] select, [data-import] button')) element.disabled = !gm || !stopped;
   for (const action of ['play','pause','stop']) panel.querySelector(`[data-action="${action}"]`).disabled = !gm || !state.tracks.length;
   const seek = panel.querySelector('[data-seek]'); seek.max = lengthOf(state) || 1; seek.disabled = !gm || !state.tracks.length;
   panel.querySelector('[data-master]').disabled = !gm;
@@ -158,18 +172,25 @@ function refresh() {
   updateClock();
 }
 function updateClock() {
-  if (!panel || panel.hidden || !state) return;
+  for (const panel of panels) {
+    if (!panel.isConnected) continue;
+    updatePanelClock(panel);
+  }
+}
+function updatePanelClock(panel) {
+  if (!state) return;
   const t = position(state, clock());
   panel.querySelector('[data-clock]').textContent = `${formatTime(t)} / ${formatTime(lengthOf(state))}`;
   panel.querySelector('[data-status]').textContent = message;
   const slider = panel.querySelector('[data-seek]');
-  if (document.activeElement !== slider) slider.value = t;
+  if (!panel.dataset.seeking && panel.ownerDocument.activeElement !== slider) slider.value = t;
+  if (panel.dataset.seeking) panel.querySelector('[data-clock]').textContent = `${formatTime(Number(slider.value))} / ${formatTime(lengthOf(state))}`;
 }
 Hooks.once('init', () => {
   game.settings.register(ID, 'transport', {scope:'world', config:false, type:Object, default:initialState(), onChange:receive});
   game.settings.register(ID, 'localVolume', {name:'Wspólny czas: głośność lokalna', scope:'client', config:false, type:Number, default:1,
     onChange:value => { if (engine) { engine.localOverride = clamp(value,0,1); if (state) void engine.accept(state); } }});
-  game.keybindings.register(ID, 'open', {name:'Otwórz przełącznik muzyki', editable:[{key:'KeyM', modifiers:['Control','Shift']}],
+  game.keybindings.register(ID, 'open', {name:'Otwórz panel muzyki — wspólny czas', editable:[{key:'KeyM', modifiers:['Control','Shift']}],
     onDown:() => { open(); return true; }});
 });
 Hooks.once('ready', async () => {
@@ -188,7 +209,7 @@ Hooks.once('ready', async () => {
     select:id => command({type:'select',id}), seek:seconds => command({type:'seek',seconds}),
     getState:() => copy(state), resync:() => engine.accept(state)
   };
-  launchButton();
+  mount(ui.playlists?.element);
   setInterval(updateClock,250);
   setInterval(() => {
     engine.tick();
@@ -202,3 +223,6 @@ Hooks.once('ready', async () => {
   });
 });
 Hooks.on('userConnected', refresh);
+
+Hooks.on('renderPlaylistDirectory', (_app, element) => mount(element));
+for (const hook of ['createPlaylist', 'updatePlaylist', 'deletePlaylist']) Hooks.on(hook, refresh);

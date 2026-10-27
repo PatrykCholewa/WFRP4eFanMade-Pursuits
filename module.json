@@ -2,7 +2,7 @@
   "id": "wfrp4e-fan-tools",
   "title": "WFRP4e Fan — Narzędzia",
   "description": "Narzędzia MG do WFRP4e: pościgi, prośby o rzuty i muzyka ze wspólną osią czasu.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "compatibility": {
     "minimum": "14",
     "maximum": "14"

@@ -10,10 +10,10 @@ test('GM/player/late join world setting propagation and access control (mock Fou
   const clients=[];
   const settle=()=>new Promise(resolve=>setImmediate(resolve));
   async function client(isGM) {
-    const hooks=new Map(), config=new Map(), local=new Map(), elements=new Map(), sounds=[];
+    const hooks=new Map(), events=new Map(), config=new Map(), local=new Map(), elements=new Map(), sounds=[];
     const gm={id:'gm',isGM:true,name:'MG'};
     const game={user:isGM?gm:{id:'p',isGM:false},users:{activeGM:gm},modules:new Map([['wfrp4e-fan-tools',{}]]),
-      keybindings:{register(){}},playlists:{map:()=>[]},socket:{on(){}},
+      keybindings:{register(){}},playlists:{map:()=>[]},socket:{on(name,fn){events.set(name,fn)}},
       time:{get serverTime(){return now},sync:async()=>{}},audio:{unlock:Promise.resolve(),music:{}},
       settings:{register(id,key,c){config.set(key,c);local.set(key,c.default)},get(id,key){return structuredClone(key==='transport'?world:local.get(key))},
         async set(id,key,value){
@@ -35,7 +35,7 @@ test('GM/player/late join world setting propagation and access control (mock Fou
     }
     const context=vm.createContext({console,game,Promise,Map,Set,JSON,Date,setTimeout,clearTimeout,setInterval(){},
       document:{createElement:()=>({setAttribute(){},addEventListener(){}}),getElementById:id=>elements.get(id),body:{append:e=>elements.set(e.id,e)},addEventListener(){}},
-      Hooks:{once:(name,fn)=>hooks.set(name,[...(hooks.get(name) ?? []),fn]),on(){}},
+      Hooks:{once:(name,fn)=>hooks.set(name,[...(hooks.get(name) ?? []),fn]),on(name,fn){events.set(name,fn)}},
       foundry:{appv1:{api:{Application:class {}}},audio:{Sound},utils:{randomID:()=>Math.random().toString(36)},applications:{apps:{}}},
       ui:{notifications:{error:err=>{throw new Error(err)},warn(){}}}});
     const modules=new Map();
@@ -46,12 +46,35 @@ test('GM/player/late join world setting propagation and access control (mock Fou
       await m.link(spec=>load(new URL(spec, 'file:///scripts/'+name).pathname.replace('/scripts/','')));return m;
     }
     const main=await load('main.js');await main.evaluate();for(const fn of hooks.get('init')) await fn();
-    const item={config,game,sounds};clients.push(item);for(const fn of hooks.get('ready')) await fn();await settle();
+    const item={config,game,sounds,events};clients.push(item);for(const fn of hooks.get('ready')) await fn();await settle();
     assert.equal(game.modules.get('wfrp4e-fan-tools').api.chase,game.wfrpChase);
     assert.equal(typeof game.wfrpChase.openTracker,'function');
     item.api=game.modules.get('wfrp4e-fan-tools').api.audio;return item;
   }
   const gm=await client(true), player=await client(false);
+  // Exercise the V14 render hook with a minimal DOM adapter, including pending HTML.
+  class Node extends EventTarget {
+    dataset={};isConnected=true;value='';fields=new Map();
+    setAttribute(){} querySelectorAll(){return []}
+    querySelector(s){if(!this.fields.has(s)) this.fields.set(s,new Node());return this.fields.get(s)}
+    append(node){this.child=node;node.isConnected=this.isConnected}
+  }
+  function directory(connected=true){
+    const root=new Node();root.isConnected=connected;
+    root.ownerDocument={createElement:()=>{const n=new Node();n.ownerDocument=root.ownerDocument;return n}};
+    root.querySelector=s=>s==='.sta-sidebar'?root.child??null:s==='.directory-list'?{before:n=>root.append(n)}:null;
+    return root;
+  }
+  const root=directory(false);
+  gm.events.get('renderPlaylistDirectory')({},root);
+  assert.equal(root.child.className,'sta-sidebar');
+  assert.ok(root.child.innerHTML.includes('data-jump'));
+  const first=root.child;root.isConnected=true;first.isConnected=true;
+  gm.events.get('renderPlaylistDirectory')({},root);
+  assert.equal(root.child,first,'rerender must not duplicate the controls');
+  const popout=directory();gm.events.get('renderPlaylistDirectory')({},popout);
+  assert.notEqual(popout.child,first);
+
   await gm.api.play();await settle();
   now=96000;await gm.api.select('b');await settle();
   for(const c of clients){const b=c.sounds.find(s=>s.path==='b.ogg');assert.ok(b.playing);assert.equal(b.calls.at(-1).offset,95)}

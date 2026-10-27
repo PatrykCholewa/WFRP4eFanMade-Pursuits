@@ -1,6 +1,6 @@
 # Wspólny czas — przełącznik muzyki
 
-Wersja 0.4.0 • Foundry VTT 14 • interfejs polski • bez dodatkowych modułów.
+Wersja 0.4.1 • Foundry VTT 14 • interfejs polski • bez dodatkowych modułów.
 
 To pierwsza wersja do prób w Foundry. Logika jest przetestowana automatycznie,
 ale nie została uruchomiona w rzeczywistej instalacji Foundry ani WFRP4e.
@@ -32,8 +32,8 @@ korygowane. To synchronizacja użytkowa, nie studyjna synchronizacja próbek.
    Nie dodawaj drugiego zagnieżdżonego folderu o tej samej nazwie.
 3. Uruchom ponownie Foundry. Otwórz świat → Zarządzaj modułami → włącz
    **WFRP4e Fan — Narzędzia**. Przeładuj świat.
-4. Panel otwierasz przyciskiem **♫** obok prawego dolnego obszaru ekranu
-   albo skrótem **Ctrl+Shift+M** (można zmienić w przypisaniach klawiszy).
+4. Sterowanie znajduje się w zakładce **Muzyka / Playlisty**, nad zwykłą listą playlist.
+   Skrót **Ctrl+Shift+M** aktywuje tę zakładkę. Sekcja jest też dostępna w odłączonym panelu playlist.
 
 To lokalna paczka: nie ma publicznego URL manifestu ani automatycznych
 aktualizacji. Hosting zarządzany musi pozwalać na instalowanie własnych modułów.
@@ -47,8 +47,9 @@ aktualizacji. Hosting zarządzany musi pozwalać na instalowanie własnych modu�
    To standardowy FilePicker Foundry: można wybrać istniejący plik lub wgrać
    nowy do folderu danych, o ile konto ma uprawnienie do wysyłania plików.
    Nie używaj ścieżek `C:\...` z własnego komputera.
-4. Kliknij **Dodaj ścieżkę**. Powtórz dla kolejnych wersji, albo dodaj
-   utwory z istniejącej playlisty. Ta operacja nie uruchamia samej playlisty.
+4. Kliknij **Dodaj ścieżkę**. Powtórz dla kolejnych wersji, albo wybierz
+   istniejącą playlistę u góry sekcji „Wspólny czas” i kliknij **Dodaj**. Po dodaniu
+   zatrzymujemy jej zwykłe odtwarzanie, aby uniknąć dublowania dźwięku.
 5. Opcjonalnie kliknij **Wczytaj wszystkie pliki u połączonych graczy**.
    Informacja o wyniku wczytania jest lokalna, nie jest raportem wszystkich
    graczy. Każdy klient pokaże swój ewentualny błąd.
@@ -123,7 +124,7 @@ else ui.notifications.warn("Nie znaleziono ścieżki Slaanesh.");
 7. Sprawdź przejście przez koniec wspólnej pętli.
 
 W razie błędu dołącz wersję Foundry, przeglądarkę, czynność i komunikat
-z konsoli F12. Wersja 0.4.0 nie była testowana na serwerze Foundry.
+z konsoli F12. Wersja 0.4.1 nie była testowana na serwerze Foundry.
 
 ## Testy i kod
 
@@ -137,3 +138,12 @@ bez instalowania zależności. Dokumentacja API wykorzystana przy implementacji:
 - https://foundryvtt.com/api/v14/classes/foundry.applications.apps.FilePicker.html
 
 Szczegóły wykonanych testów są w `TEST_REPORT.md`.
+
+## Przewijanie w panelu muzyki
+
+- Kliknij lub przeciągnij suwak. Podczas przeciągania widzisz wybrany czas; puszczenie zatwierdza pozycję u wszystkich graczy.
+- Użyj −10 s / +10 s do małych korekt.
+- Wpisz `13:12`, `1:13:12` lub liczbę sekund i naciśnij **Przejdź** / Enter.
+- Przewijanie zachowuje stan odtwarzania: podczas pauzy muzyka nie startuje. Kolejna wybrana ścieżka korzysta z nowej wspólnej pozycji.
+- Steruje główny aktywny MG. Gracze widzą czas i mają własną głośność.
+- Natywne przyciski ▶ zwykłych playlist zachowują standardowe zachowanie Foundry. Warianty w synchronizacji wybieraj przyciskami w sekcji „Wspólny czas”.

@@ -1,10 +1,10 @@
-# Test report — 0.4.0
+# Test report — 0.4.1
 
 Date: 2026-10-27. Target: Foundry VTT 14. Node.js: 24.22.1.
 
 ## Executed successfully
 
-`npm test`: 15 tests passed, 0 failed.
+`npm test`: 17 tests passed, 0 failed.
 
 - A 1:35 → B 1:35 → A 1:55.
 - Pause, change selected version while paused, resume.
@@ -23,7 +23,7 @@ Date: 2026-10-27. Target: Foundry VTT 14. Node.js: 24.22.1.
   representing GM, player and late-joining player. Mock Foundry settings
   transport propagates playback changes; player control is denied.
 
-The integration test is included in the 15 test total. Audio APIs, DOM and
+The integration test is included in the 17 test total. Audio APIs, DOM and
 Foundry server are mocked. It is not an actual multiplayer Foundry test.
 
 JS syntax and JSON manifest were checked. ZIP content and checksum integrity
@@ -44,3 +44,5 @@ No browser-test pass is claimed.
 Perform the short GM + player acceptance test in AUDIO.md before a session.
 
 Migration tests cover active-GM ownership, local volume, paused imported audio, preserving source data, no overwrite of new data, and board background path repair. Compendium binary files are preserved from the repository. Actual compendium loading remains unverified.
+
+Sidebar/seek regression coverage: PlaylistDirectory render hook mounts controls inside sidebar and popout, including pending detached HTML; repeated renders do not duplicate controls. Timestamp parsing, slider preview/commit and ±10 controls tested. DOM is a minimal test adapter, not a rendered browser or actual Foundry.
