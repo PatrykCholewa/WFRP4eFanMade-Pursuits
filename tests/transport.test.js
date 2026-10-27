@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initialState, position, transition, lengthOf, drift, validPath} from '../scripts/core.js';
-import {TimelineEngine} from '../scripts/engine.js';
+import {initialState, position, transition, lengthOf, drift, validPath} from '../scripts/audio/core.js';
+import {TimelineEngine} from '../scripts/audio/engine.js';
 const tracks = [{id:'a',name:'A',path:'a.ogg',duration:300},{id:'b',name:'B',path:'b.ogg',duration:320}];
 const seed = () => ({...initialState(),tracks,selected:'a'});
 

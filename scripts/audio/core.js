@@ -1,4 +1,4 @@
-export const ID = 'shared-timeline-audio';
+export const ID = 'wfrp4e-fan-tools';
 export const clamp = (n, a, b) => Math.min(b, Math.max(a, Number(n) || 0));
 export const copy = value => JSON.parse(JSON.stringify(value));
 export function initialState() {

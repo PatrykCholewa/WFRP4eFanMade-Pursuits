@@ -1,6 +1,6 @@
 # Wspólny czas — przełącznik muzyki
 
-Wersja 0.1.0 • Foundry VTT 14 • interfejs polski • bez dodatkowych modułów.
+Wersja 0.4.0 • Foundry VTT 14 • interfejs polski • bez dodatkowych modułów.
 
 To pierwsza wersja do prób w Foundry. Logika jest przetestowana automatycznie,
 ale nie została uruchomiona w rzeczywistej instalacji Foundry ani WFRP4e.
@@ -26,12 +26,12 @@ korygowane. To synchronizacja użytkowa, nie studyjna synchronizacja próbek.
 
 ## Instalacja ręczna
 
-1. Rozpakuj ZIP. Skopiuj cały folder `shared-timeline-audio` do folderu
+1. Rozpakuj ZIP. Skopiuj cały folder `wfrp4e-fan-tools` do folderu
    `Data/modules/` w **katalogu danych użytkownika Foundry**.
-2. Poprawna ścieżka to `Data/modules/shared-timeline-audio/module.json`.
+2. Poprawna ścieżka to `Data/modules/wfrp4e-fan-tools/module.json`.
    Nie dodawaj drugiego zagnieżdżonego folderu o tej samej nazwie.
 3. Uruchom ponownie Foundry. Otwórz świat → Zarządzaj modułami → włącz
-   **Wspólny czas — przełącznik muzyki**. Przeładuj świat.
+   **WFRP4e Fan — Narzędzia**. Przeładuj świat.
 4. Panel otwierasz przyciskiem **♫** obok prawego dolnego obszaru ekranu
    albo skrótem **Ctrl+Shift+M** (można zmienić w przypisaniach klawiszy).
 
@@ -93,20 +93,20 @@ To rozwiązanie problemu sterowania odtwarzaniem, nie synchronizacji aranżacji.
 Otwórz panel:
 
 ```js
-game.modules.get("shared-timeline-audio").api.open();
+game.modules.get("wfrp4e-fan-tools").api.audio.open();
 ```
 
 Odtwórz / pauza / stop:
 
 ```js
-await game.modules.get("shared-timeline-audio").api.play();
+await game.modules.get("wfrp4e-fan-tools").api.audio.play();
 // .pause() albo .stop()
 ```
 
 Wybór po nazwie bez resetowania czasu:
 
 ```js
-const audio = game.modules.get("shared-timeline-audio").api;
+const audio = game.modules.get("wfrp4e-fan-tools").api;
 const track = audio.getState().tracks.find(t => t.name === "Slaanesh");
 if (track) await audio.select(track.id);
 else ui.notifications.warn("Nie znaleziono ścieżki Slaanesh.");
@@ -123,7 +123,7 @@ else ui.notifications.warn("Nie znaleziono ścieżki Slaanesh.");
 7. Sprawdź przejście przez koniec wspólnej pętli.
 
 W razie błędu dołącz wersję Foundry, przeglądarkę, czynność i komunikat
-z konsoli F12. Wersja 0.1.0 nie była testowana na serwerze Foundry.
+z konsoli F12. Wersja 0.4.0 nie była testowana na serwerze Foundry.
 
 ## Testy i kod
 

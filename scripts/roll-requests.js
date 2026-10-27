@@ -221,7 +221,7 @@ async function runActorSkillTest(moduleId, actor, skill, request) {
 }
 
 async function openPlayerRollDialog(moduleId, message) {
-  const request = foundry.utils.deepClone(message.getFlag(moduleId, ROLL_REQUEST_FLAG));
+  const request = foundry.utils.deepClone((message.getFlag(moduleId, ROLL_REQUEST_FLAG) ?? message.flags?.["wfrp4e-pod-bronia-poscigi"]?.[ROLL_REQUEST_FLAG]));
   if (!request) return;
 
   const actor = game.actors?.get(request.actorId);
@@ -358,7 +358,7 @@ export function initializeRollRequestSupport({ moduleId, getTrackerData, getPart
       </form>
     `;
 
-    new Dialog({
+    new foundry.appv1.api.Dialog({
       title: "Popros o testy",
       content,
       buttons: {
@@ -387,7 +387,7 @@ export function initializeRollRequestSupport({ moduleId, getTrackerData, getPart
   }
 
   Hooks.on("renderChatMessageHTML", (message, html) => {
-    const request = message.getFlag(moduleId, ROLL_REQUEST_FLAG);
+    const request = (message.getFlag(moduleId, ROLL_REQUEST_FLAG) ?? message.flags?.["wfrp4e-pod-bronia-poscigi"]?.[ROLL_REQUEST_FLAG]);
     if (!request) return;
 
     html.querySelectorAll("[data-action='prompt-roll']").forEach(button => button.addEventListener("click", async (event) => {
@@ -400,3 +400,4 @@ export function initializeRollRequestSupport({ moduleId, getTrackerData, getPart
     openRollRequestDialog
   };
 }
+

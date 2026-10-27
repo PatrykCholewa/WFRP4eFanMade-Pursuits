@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-import {initialState} from '../scripts/core.js';
+import {initialState} from '../scripts/audio/core.js';
 
 test('GM/player/late join world setting propagation and access control (mock Foundry)',async()=>{
   let now=1000;
@@ -12,7 +12,7 @@ test('GM/player/late join world setting propagation and access control (mock Fou
   async function client(isGM) {
     const hooks=new Map(), config=new Map(), local=new Map(), elements=new Map(), sounds=[];
     const gm={id:'gm',isGM:true,name:'MG'};
-    const game={user:isGM?gm:{id:'p',isGM:false},users:{activeGM:gm},modules:new Map([['shared-timeline-audio',{}]]),
+    const game={user:isGM?gm:{id:'p',isGM:false},users:{activeGM:gm},modules:new Map([['wfrp4e-fan-tools',{}]]),
       keybindings:{register(){}},playlists:{map:()=>[]},socket:{on(){}},
       time:{get serverTime(){return now},sync:async()=>{}},audio:{unlock:Promise.resolve(),music:{}},
       settings:{register(id,key,c){config.set(key,c);local.set(key,c.default)},get(id,key){return structuredClone(key==='transport'?world:local.get(key))},
@@ -35,19 +35,21 @@ test('GM/player/late join world setting propagation and access control (mock Fou
     }
     const context=vm.createContext({console,game,Promise,Map,Set,JSON,Date,setTimeout,clearTimeout,setInterval(){},
       document:{createElement:()=>({setAttribute(){},addEventListener(){}}),getElementById:id=>elements.get(id),body:{append:e=>elements.set(e.id,e)},addEventListener(){}},
-      Hooks:{once:(name,fn)=>hooks.set(name,fn),on(){}},
-      foundry:{audio:{Sound},utils:{randomID:()=>Math.random().toString(36)},applications:{apps:{}}},
+      Hooks:{once:(name,fn)=>hooks.set(name,[...(hooks.get(name) ?? []),fn]),on(){}},
+      foundry:{appv1:{api:{Application:class {}}},audio:{Sound},utils:{randomID:()=>Math.random().toString(36)},applications:{apps:{}}},
       ui:{notifications:{error:err=>{throw new Error(err)},warn(){}}}});
     const modules=new Map();
     async function load(name){
       if(modules.has(name))return modules.get(name);
       const source=await readFile(new URL(`../scripts/${name}`,import.meta.url),'utf8');
       const m=new vm.SourceTextModule(source,{context,identifier:name});modules.set(name,m);
-      await m.link(spec=>load(spec.replace('./','')));return m;
+      await m.link(spec=>load(new URL(spec, 'file:///scripts/'+name).pathname.replace('/scripts/','')));return m;
     }
-    const main=await load('main.js');await main.evaluate();hooks.get('init')();
-    const item={config,game,sounds};clients.push(item);hooks.get('ready')();await settle();
-    item.api=game.modules.get('shared-timeline-audio').api;return item;
+    const main=await load('main.js');await main.evaluate();for(const fn of hooks.get('init')) await fn();
+    const item={config,game,sounds};clients.push(item);for(const fn of hooks.get('ready')) await fn();await settle();
+    assert.equal(game.modules.get('wfrp4e-fan-tools').api.chase,game.wfrpChase);
+    assert.equal(typeof game.wfrpChase.openTracker,'function');
+    item.api=game.modules.get('wfrp4e-fan-tools').api.audio;return item;
   }
   const gm=await client(true), player=await client(false);
   await gm.api.play();await settle();

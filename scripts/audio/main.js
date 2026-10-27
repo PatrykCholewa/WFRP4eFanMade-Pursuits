@@ -1,3 +1,4 @@
+import { migrateLegacyData } from "../migration.js";
 import {ID, initialState, transition, position, lengthOf, formatTime, validPath, copy, clamp} from './core.js';
 import {TimelineEngine} from './engine.js';
 
@@ -171,7 +172,8 @@ Hooks.once('init', () => {
   game.keybindings.register(ID, 'open', {name:'Otwórz przełącznik muzyki', editable:[{key:'KeyM', modifiers:['Control','Shift']}],
     onDown:() => { open(); return true; }});
 });
-Hooks.once('ready', () => {
+Hooks.once('ready', async () => {
+  await migrateLegacyData();
   engine = new TimelineEngine({
     create:path => new foundry.audio.Sound(path, {context:game.audio.music, forceBuffer:true}),
     now:clock, unlocked:() => game.audio.unlock,
@@ -180,7 +182,8 @@ Hooks.once('ready', () => {
   const saved = game.settings.get(ID, 'transport');
   lastPreload = saved.preload;
   receive(saved);
-  game.modules.get(ID).api = {
+  game.modules.get(ID).api ??= {};
+  game.modules.get(ID).api.audio = {
     open, play:() => command({type:'play'}), pause:() => command({type:'pause'}), stop:() => command({type:'stop'}),
     select:id => command({type:'select',id}), seek:seconds => command({type:'seek',seconds}),
     getState:() => copy(state), resync:() => engine.accept(state)

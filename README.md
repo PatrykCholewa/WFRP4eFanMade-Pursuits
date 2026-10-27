@@ -1,49 +1,47 @@
-# WFRP4eFanMade-Pursuits
+# WFRP4e Fan — Narzędzia
 
-Własne dodatki do Foundry VTT. Repozytorium zawiera dwa niezależne moduły:
+Jeden moduł dla Foundry VTT 14 / WFRP4e, ID `wfrp4e-fan-tools`, wersja 0.4.0:
 
-| Moduł | Źródła | Instalacja |
-| --- | --- | --- |
-| **WFRP4e Fan – Pościgi** | `module.json`, `scripts/`, `styles/`, `packs/` w katalogu głównym | Dotychczasowy manifest i wydania `v0.3.x` |
-| **Wspólny czas — przełącznik muzyki** | [`modules/shared-timeline-audio/`](modules/shared-timeline-audio/) | Osobny ZIP, Foundry VTT 14 |
+- Plansza i tracker pościgu oraz prośby o testy, wraz z dotychczasowym kompendium makr.
+- Muzyka: ręczne przełączanie pełnych utworów przy zachowaniu wspólnego czasu, bez ich nakładania. A 13:12 → B 13:12; po 10 sekundach powrót do A 13:22.
+- Pauza, stop, przewijanie, wspólna pętla, lokalna głośność i synchronizacja graczy.
 
-## Wspólny czas — muzyka
+Odtwarzacz jest częścią tego modułu. Nie instaluje się osobnego `shared-timeline-audio`.
 
-Wybierasz jedną z kilku pełnych ścieżek; nowy utwór przejmuje bieżący czas.
-Przykład: A na 1:35 → B na 1:35 → po 20 sekundach A na 1:55.
-Jest pauza, przewijanie, wspólne zapętlenie, lokalna głośność i synchronizacja
-stanu między MG a graczami. Nie wymaga Adaptive Audio ani WFRP4e.
+## Instalacja i przejście ze starego ID
 
-### Instalacja
+1. Wykonaj kopię świata przed migracją. Zachowaj starą paczkę jako kopię.
+2. Wyłącz w świecie `wfrp4e-pod-bronia-poscigi` oraz `shared-timeline-audio`, jeżeli był zainstalowany.
+3. Rozpakuj ZIP do katalogu danych Foundry: `Data/modules/wfrp4e-fan-tools/module.json`.
+4. Uruchom ponownie Foundry i włącz **WFRP4e Fan — Narzędzia** w świecie.
+5. Wejdź jako MG. Główny aktywny MG kopiuje stary tracker i konfigurację odtwarzacza, jeżeli nowe ustawienia jeszcze nie istnieją. Stare dane pozostają zapisane. Importowana muzyka zostaje wstrzymana.
+6. Sprawdź planszę, tracker i prośbę o rzut. Otwórz muzykę przez ♫ lub Ctrl+Shift+M, dodaj pliki i sprawdź przełączanie z połączonym graczem.
 
-1. Pobierz artefakt `shared-timeline-audio` z udanego przebiegu workflow
-   **Shared Timeline Audio** w zakładce Actions. Pobranie artefaktów GitHub
-   może wymagać zalogowania. Rozpakuj pobrany artefakt, aby uzyskać ZIP modułu.
-2. Alternatywnie zbuduj go lokalnie:
+Zmiana ID nie jest zwykłą aktualizacją w miejscu: nowy moduł trzeba włączyć w każdym świecie.
+Migracja naprawia standardową ścieżkę tła istniejących plansz pościgu. Zachowuje `game.wfrpChase`, więc dołączone i wcześniej zaimportowane makra nadal używają tego samego API. Stare flagi próśb o rzut pozostają czytelne.
 
-   ```sh
-   python3 tools/package-shared-timeline-audio.py
-   ```
+Kompendium ma teraz UUID zaczynające się od `Compendium.wfrp4e-fan-tools.macros`.
+Własne linki z prefiksem `Compendium.wfrp4e-pod-bronia-poscigi.macros` trzeba poprawić ręcznie; moduł nie przepisuje treści dzienników ani własnych skryptów użytkownika. Zmodyfikowane przez użytkownika kompendium starego modułu należy wcześniej wyeksportować — paczka zawiera wersję repozytorium.
 
-3. Rozpakuj `dist/shared-timeline-audio-v0.1.0.zip` do katalogu danych Foundry
-   `Data/modules/`. Wynikiem ma być `Data/modules/shared-timeline-audio/module.json`.
-4. Uruchom ponownie Foundry, włącz **Wspólny czas — przełącznik muzyki** w świecie.
-5. Otwórz panel przyciskiem **♫** albo **Ctrl+Shift+M**.
+Ta wersja do testów nie deklaruje `verified`, manifestu aktualizacji ani adresu wydania, które nie zostało jeszcze opublikowane.
 
-Nie podawaj głównego manifestu pościgów przy instalowaniu odtwarzacza.
-Odtwarzacz nie ma jeszcze publicznego manifestu z automatycznym pobieraniem;
-workflow tworzy artefakt testowy, nie publikuje wydania i nie aktualizuje pościgów.
+## Obsługa i API
 
-[Instrukcja odtwarzacza](modules/shared-timeline-audio/README.md) ·
-[Wyniki i ograniczenia testów](modules/shared-timeline-audio/TEST_REPORT.md)
+[Pełna instrukcja muzyki](docs/AUDIO.md).
 
-### Sprawdzenie kodu
-
-```sh
-npm --prefix modules/shared-timeline-audio test
-python3 tools/package-shared-timeline-audio.py
+```js
+game.modules.get('wfrp4e-fan-tools').api.audio.open();
+game.modules.get('wfrp4e-fan-tools').api.chase.openTracker();
+// Zachowana zgodność dotychczasowych makr:
+game.wfrpChase.openRollRequestDialog();
 ```
 
-Testy wykorzystują Node.js 22+ i nie potrzebują pakietów npm.
-Wersja 0.1.0 jest przeznaczona do prób: testy logiki i symulowanych klientów
-nie zastępują uruchomienia w rzeczywistym świecie Foundry V14.
+Najkrótszy plik określa wspólną długość pętli. Moduł nie wyrównuje tempa i fraz różnych aranżacji Suno. Na czas testu zatrzymaj inne playlisty i Adaptive Audio, aby nie odtwarzały równolegle tej samej muzyki.
+
+## Budowanie i testy
+
+`npm test` — 15 testów automatycznych, bez zewnętrznych zależności npm.
+
+`python3 tools/package-module.py` — wspólna paczka `dist/wfrp4e-fan-tools-v0.4.0.zip` z pościgami, muzyką, planszą i kompendium. GitHub Actions również buduje ZIP jako artefakt.
+
+Test integracyjny uruchamia główny skrypt modułu i obie funkcjonalności w symulowanych klientach MG/gracza. Osobne testy sprawdzają migrację, uprawnienia, zachowanie nowych danych i wspólną oś czasu. To nie jest test prawdziwego Foundry ani jakości dźwięku. Przed sesją wymagane jest sprawdzenie V14 z graczem; patrz [raport testów](docs/TEST_REPORT.md).
