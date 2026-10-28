@@ -1,48 +1,16 @@
-# Test report — 0.4.1
+# Test report — 0.4.2
 
-Date: 2026-10-27. Target: Foundry VTT 14. Node.js: 24.22.1.
+Target: Foundry VTT 14 / WFRP4e. `npm test`: 21 passing tests.
 
-## Executed successfully
+Coverage:
+- Shared clock, track switching, pause/resume, seek, loops and late joining.
+- No overlapping audio, stale loads, delayed unlock, error handling.
+- Integrated module entry point in simulated GM/player clients, settings propagation and permissions.
+- ID migration preserves old data and existing new settings; standard board paths repaired.
+- Native playlist DOM fixture with LinkeDOM: existing native rows/controls retained; repeated rendering does not duplicate chain buttons or current track; native play buttons route to shared time; unrelated playlists pass through.
+- Player current-track DOM exposes name, timestamp and resync only, without GM transport or seek controls.
+- Timestamp parsing, slider preview/commit and ±10 controls.
 
-`npm test`: 17 tests passed, 0 failed.
+Package script checks JavaScript syntax, manifest resources, compendium presence and ZIP integrity. LinkeDOM is test-only and excluded from the installable ZIP.
 
-- A 1:35 → B 1:35 → A 1:55.
-- Pause, change selected version while paused, resume.
-- Shared seeking and stop/reset.
-- Late join at the current server-clock position.
-- Shortest-file common loop, wraparound, explicit shorter loop.
-- Non-looping end.
-- Invalid selection and disallowed list edits while playing.
-- Rejection of executable/data/local-browser paths.
-- Stop outgoing audio before starting incoming audio.
-- Delayed load cannot override a newer selection.
-- Stop cancels a pending load.
-- Browser unlock delay is included in the target timestamp.
-- Load error stops old audio without a retry flood.
-- Integration test: integrated root main.js (chase + audio) loaded in separate Node VM contexts
-  representing GM, player and late-joining player. Mock Foundry settings
-  transport propagates playback changes; player control is denied.
-
-The integration test is included in the 17 test total. Audio APIs, DOM and
-Foundry server are mocked. It is not an actual multiplayer Foundry test.
-
-JS syntax and JSON manifest were checked. ZIP content and checksum integrity
-were checked at packaging time.
-
-## Not verified here
-
-- Actual Foundry runtime, WFRP4e world, native FilePicker upload workflow.
-- Actual Foundry socket/settings propagation under network latency.
-- Native Sound implementation, audio decoding and audible quality of fades.
-- Visual rendering of the panel in Foundry themes.
-- Real client reload/reconnect and browser autoplay policies.
-
-A Playwright browser smoke test could not be run because the browser runtime
-was unavailable and the browser download did not produce a valid archive.
-No browser-test pass is claimed.
-
-Perform the short GM + player acceptance test in AUDIO.md before a session.
-
-Migration tests cover active-GM ownership, local volume, paused imported audio, preserving source data, no overwrite of new data, and board background path repair. Compendium binary files are preserved from the repository. Actual compendium loading remains unverified.
-
-Sidebar/seek regression coverage: PlaylistDirectory render hook mounts controls inside sidebar and popout, including pending detached HTML; repeated renders do not duplicate controls. Timestamp parsing, slider preview/commit and ±10 controls tested. DOM is a minimal test adapter, not a rendered browser or actual Foundry.
+Not verified: real Foundry runtime, exact production PlaylistDirectory markup across V14 builds, WFRP themes, browser rendering, native audio output, actual network/socket propagation and compendium loading. DOM fixtures and audio APIs are simulated. The module remains a draft pending the acceptance test in AUDIO.md.

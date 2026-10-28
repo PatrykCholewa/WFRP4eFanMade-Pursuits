@@ -6,14 +6,14 @@ import {initialState} from '../scripts/audio/core.js';
 
 test('GM/player/late join world setting propagation and access control (mock Foundry)',async()=>{
   let now=1000;
-  let world={...initialState(),tracks:[{id:'a',name:'A',path:'a.ogg',duration:300},{id:'b',name:'B',path:'b.ogg',duration:300}],selected:'a'};
+  let world={...initialState(),playlistId:'p1',tracks:[{id:'a',name:'A',path:'a.ogg',duration:300},{id:'b',name:'B',path:'b.ogg',duration:300}],selected:'a'};
   const clients=[];
   const settle=()=>new Promise(resolve=>setImmediate(resolve));
   async function client(isGM) {
     const hooks=new Map(), events=new Map(), config=new Map(), local=new Map(), elements=new Map(), sounds=[];
     const gm={id:'gm',isGM:true,name:'MG'};
     const game={user:isGM?gm:{id:'p',isGM:false},users:{activeGM:gm},modules:new Map([['wfrp4e-fan-tools',{}]]),
-      keybindings:{register(){}},playlists:{map:()=>[]},socket:{on(name,fn){events.set(name,fn)}},
+      keybindings:{register(){}},playlists:{contents:[],get:id=>id==='p1'?{stopAll:async()=>{}}:undefined},socket:{on(name,fn){events.set(name,fn)}},
       time:{get serverTime(){return now},sync:async()=>{}},audio:{unlock:Promise.resolve(),music:{}},
       settings:{register(id,key,c){config.set(key,c);local.set(key,c.default)},get(id,key){return structuredClone(key==='transport'?world:local.get(key))},
         async set(id,key,value){
@@ -52,29 +52,6 @@ test('GM/player/late join world setting propagation and access control (mock Fou
     item.api=game.modules.get('wfrp4e-fan-tools').api.audio;return item;
   }
   const gm=await client(true), player=await client(false);
-  // Exercise the V14 render hook with a minimal DOM adapter, including pending HTML.
-  class Node extends EventTarget {
-    dataset={};isConnected=true;value='';fields=new Map();
-    setAttribute(){} querySelectorAll(){return []}
-    querySelector(s){if(!this.fields.has(s)) this.fields.set(s,new Node());return this.fields.get(s)}
-    append(node){this.child=node;node.isConnected=this.isConnected}
-  }
-  function directory(connected=true){
-    const root=new Node();root.isConnected=connected;
-    root.ownerDocument={createElement:()=>{const n=new Node();n.ownerDocument=root.ownerDocument;return n}};
-    root.querySelector=s=>s==='.sta-sidebar'?root.child??null:s==='.directory-list'?{before:n=>root.append(n)}:null;
-    return root;
-  }
-  const root=directory(false);
-  gm.events.get('renderPlaylistDirectory')({},root);
-  assert.equal(root.child.className,'sta-sidebar');
-  assert.ok(root.child.innerHTML.includes('data-jump'));
-  const first=root.child;root.isConnected=true;first.isConnected=true;
-  gm.events.get('renderPlaylistDirectory')({},root);
-  assert.equal(root.child,first,'rerender must not duplicate the controls');
-  const popout=directory();gm.events.get('renderPlaylistDirectory')({},popout);
-  assert.notEqual(popout.child,first);
-
   await gm.api.play();await settle();
   now=96000;await gm.api.select('b');await settle();
   for(const c of clients){const b=c.sounds.find(s=>s.path==='b.ogg');assert.ok(b.playing);assert.equal(b.calls.at(-1).offset,95)}

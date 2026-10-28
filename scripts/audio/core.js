@@ -2,7 +2,7 @@ export const ID = 'wfrp4e-fan-tools';
 export const clamp = (n, a, b) => Math.min(b, Math.max(a, Number(n) || 0));
 export const copy = value => JSON.parse(JSON.stringify(value));
 export function initialState() {
-  return {schema: 1, revision: 0, tracks: [], selected: null, status: 'stopped',
+  return {schema: 1, revision: 0, playlistId: null, tracks: [], selected: null, status: 'stopped',
     offset: 0, anchor: 0, loop: true, loopEnd: 0, volume: 0.7, transitionMs: 120, preload: 0};
 }
 export function lengthOf(state) {
@@ -27,6 +27,19 @@ export function transition(state, action, now) {
   s.anchor = now;
   const duration = lengthOf(s);
   switch (action.type) {
+    case 'bind':
+      s.playlistId = action.playlistId; s.tracks = copy(action.tracks);
+      s.selected = s.tracks[0]?.id ?? null; s.status = 'stopped'; s.offset = 0;
+      s.loopEnd = 0;
+      break;
+    case 'unbind':
+      s.playlistId = null; s.status = 'stopped'; s.offset = 0;
+      break;
+    case 'playTrack':
+      if (!s.tracks.some(t => t.id === action.id)) throw new Error('Nie znaleziono ścieżki.');
+      s.selected = action.id; s.status = 'playing';
+      if (s.offset >= duration) s.offset = 0;
+      break;
     case 'select':
       if (!s.tracks.some(t => t.id === action.id)) throw new Error('Nie znaleziono ścieżki.');
       s.selected = action.id;
