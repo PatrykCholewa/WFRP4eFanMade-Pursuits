@@ -1,0 +1,33 @@
+{
+  "id": "tabela-wizji",
+  "title": "Tabela Wizji",
+  "description": "Polskie tabele wizji, tre?ci i czasu trwania. Modu? Foundry VTT niezale?ny od systemu.",
+  "version": "1.0.1",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14",
+    "maximum": "14"
+  },
+  "authors": [
+    {
+      "name": "Patryk Cholewa"
+    }
+  ],
+  "packs": [
+    {
+      "name": "tabele",
+      "label": "Tabele Wizji",
+      "path": "packs/tabele",
+      "type": "RollTable"
+    },
+    {
+      "name": "makra",
+      "label": "Makra",
+      "path": "packs/makra",
+      "type": "Macro"
+    }
+  ],
+  "url": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/tree/visirion",
+  "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/visirion/module.json",
+  "download": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/visirion/tabela-wizji.zip"
+}
