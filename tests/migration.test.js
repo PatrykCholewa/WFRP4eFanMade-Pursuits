@@ -9,7 +9,8 @@ function fixture(isGM=true) {
   const local=new Map([['shared-timeline-audio.localVolume','0.4']]);
   world.getItem=k=>world.get(k)??null;local.getItem=k=>local.get(k)??null;
   const changes=[];
-  const scene={background:{src:`modules/${old}/assets/chase-board.svg`},async update(v){changes.push(v);this.background.src=v['background.src']}};
+  const level={background:{src:`modules/${old}/assets/chase-board.svg`},async update(v){changes.push(v);this.background.src=v['background.src']}};
+  const scene={levels:[level],firstLevel:level};
   const game={user:{id:isGM?'gm':'p',isGM},users:{activeGM:{id:'gm'}},scenes:[scene],
     settings:{storage:new Map([['world',world],['client',local]]),async set(ns,key,value){(key==='localVolume'?local:world).set(`${ns}.${key}`,JSON.stringify(value))}}};
   return {game,world,local,changes,id};
@@ -32,4 +33,23 @@ test('player migrates only personal volume; world writes belong to active GM',as
   const {game,world,local,changes,id}=fixture(false);await migrate(game);
   assert.equal(world.has(`${id}.tracker`),false);assert.equal(changes.length,0);
   assert.equal(local.get(`${id}.localVolume`),'0.4');
+});
+
+test('migration accepts Foundry world setting values already cast as objects',async()=>{
+  const {game,world,id}=fixture();
+  const tracker={participants:[{actorId:'legacy-actor'}]};
+  const transport={tracks:[{id:'song'}],status:'playing',anchor:123,offset:42};
+  world.set('wfrp4e-pod-bronia-poscigi.tracker',tracker);
+  world.set('shared-timeline-audio.transport',transport);
+
+  await migrate(game);
+
+  assert.deepEqual(JSON.parse(world.get(`${id}.tracker`)),tracker);
+  assert.deepEqual(JSON.parse(world.get(`${id}.transport`)),{
+    ...transport,
+    status:'paused',
+    anchor:0
+  });
+  assert.equal(transport.status,'playing');
+  assert.equal(transport.anchor,123);
 });

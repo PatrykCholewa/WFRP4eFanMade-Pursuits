@@ -1,4 +1,4 @@
-# Muzyka w zwykłych playlistach — 0.4.2
+# Muzyka w zwykłych playlistach — 0.4.3
 
 ## Korzystanie
 

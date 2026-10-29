@@ -56,19 +56,23 @@ function getParticipantActor(participant) {
 
 async function ensureBoardScene() {
   let scene = game.scenes.getName(BOARD_SCENE_NAME);
-  if (scene) return scene;
   const img = `modules/${MODULE_ID}/assets/chase-board.svg`;
-  scene = await Scene.create({
-    name: BOARD_SCENE_NAME,
-    navName: BOARD_SCENE_NAME,
-    width: BOARD_WIDTH,
-    height: BOARD_HEIGHT,
-    padding: 0,
-    grid: { type: 0, size: 100, distance: 1, units: "pole" },
-    tokenVision: false,
-    background: { src: img },
-    initial: { x: BOARD_WIDTH / 2, y: BOARD_HEIGHT / 2, scale: 0.8 }
-  });
+  if (!scene) {
+    scene = await Scene.create({
+      name: BOARD_SCENE_NAME,
+      navName: BOARD_SCENE_NAME,
+      width: BOARD_WIDTH,
+      height: BOARD_HEIGHT,
+      padding: 0,
+      grid: { type: 0, size: 100, distance: 1, units: "pole" },
+      tokenVision: false,
+      levels: [{ name: BOARD_SCENE_NAME, background: { src: img } }],
+      initial: { x: BOARD_WIDTH / 2, y: BOARD_HEIGHT / 2, scale: 0.8 }
+    });
+  }
+  const level = scene.initialLevel ?? scene.firstLevel;
+  if (!level) throw new Error(`Could not find a level for the ${BOARD_SCENE_NAME} scene.`);
+  if (level.background?.src !== img) await level.update({ "background.src": img });
   return scene;
 }
 
@@ -274,4 +278,3 @@ Hooks.once("ready", async () => {
     console.log(`${MODULE_ID} | gotowy`);
   }
 });
-

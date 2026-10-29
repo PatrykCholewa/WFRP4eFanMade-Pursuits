@@ -2,9 +2,10 @@
   "id": "wfrp4e-fan-tools",
   "title": "WFRP4e Fan — Narzędzia",
   "description": "Narzędzia MG do WFRP4e: pościgi, prośby o rzuty i muzyka ze wspólną osią czasu.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "compatibility": {
     "minimum": "14",
+    "verified": "14",
     "maximum": "14"
   },
   "authors": [
@@ -53,5 +54,5 @@
     }
   ],
   "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/refs/heads/master/module.json",
-  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/releases/download/v0.4.2/wfrp4e-fan-tools-v0.4.2.zip"
+  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/releases/download/v0.4.3/wfrp4e-fan-tools-v0.4.3.zip"
 }
