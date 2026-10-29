@@ -1,0 +1,12 @@
+{
+  "name": "wfrp4e-fan-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules --test tests/*.test.js"
+  },
+  "version": "0.4.2",
+  "devDependencies": {
+    "linkedom": "0.18.14"
+  }
+}

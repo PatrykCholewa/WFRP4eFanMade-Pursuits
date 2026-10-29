@@ -1,6 +1,8 @@
+import "./audio/main.js";
+import { migrateLegacyData } from "./migration.js";
 import { initializeRollRequestSupport } from "./roll-requests.js";
 
-const MODULE_ID = "wfrp4e-pod-bronia-poscigi";
+const MODULE_ID = "wfrp4e-fan-tools";
 const BOARD_SCENE_NAME = "Plansza poscigu";
 const BOARD_WIDTH = 2200;
 const BOARD_HEIGHT = 1400;
@@ -91,7 +93,7 @@ async function syncParticipantFromToken(tokenDoc, change = {}) {
   if (ui.wfrpChaseTracker?.rendered) ui.wfrpChaseTracker.render(true);
 }
 
-class ChaseTrackerApp extends Application {
+class ChaseTrackerApp extends foundry.appv1.api.Application {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "wfrp-chase-tracker",
@@ -214,6 +216,8 @@ const rollRequests = initializeRollRequestSupport({ moduleId: MODULE_ID, getTrac
 
 Hooks.once("init", async () => {
   game.wfrpChase = { openBoard, openTracker, openRollRequestDialog: rollRequests.openRollRequestDialog, ensureBoardScene };
+  game.modules.get(MODULE_ID).api ??= {};
+  game.modules.get(MODULE_ID).api.chase = game.wfrpChase;
   await game.settings.register(MODULE_ID, "tracker", {
     name: "Tracker poscigu",
     scope: "world",
@@ -265,7 +269,9 @@ Hooks.on("updateToken", async (tokenDoc, change, _options, userId) => {
 });
 
 Hooks.once("ready", async () => {
+  await migrateLegacyData();
   if (game.user.isGM) {
     console.log(`${MODULE_ID} | gotowy`);
   }
 });
+
