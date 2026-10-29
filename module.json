@@ -51,5 +51,7 @@
         "macros"
       ]
     }
-  ]
+  ],
+  "manifest": "https://raw.githubusercontent.com/PatrykCholewa/WFRP4eFanMade-Pursuits/refs/heads/master/module.json",
+  "download": "https://github.com/PatrykCholewa/WFRP4eFanMade-Pursuits/releases/download/v0.4.2/wfrp4e-fan-tools-v0.4.2.zip"
 }

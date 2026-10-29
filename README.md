@@ -23,7 +23,9 @@ Migracja naprawia standardową ścieżkę tła istniejących plansz pościgu. Za
 Kompendium ma teraz UUID zaczynające się od `Compendium.wfrp4e-fan-tools.macros`.
 Własne linki z prefiksem `Compendium.wfrp4e-pod-bronia-poscigi.macros` trzeba poprawić ręcznie; moduł nie przepisuje treści dzienników ani własnych skryptów użytkownika. Zmodyfikowane przez użytkownika kompendium starego modułu należy wcześniej wyeksportować — paczka zawiera wersję repozytorium.
 
-Ta wersja do testów nie deklaruje `verified`, manifestu aktualizacji ani adresu wydania, które nie zostało jeszcze opublikowane.
+Manifest aktualizacji wskazuje na bieżącą gałąź `master`, a paczka wydania jest
+publikowana w GitHub Releases. Nie deklarujemy `verified`, dopóki moduł nie
+zostanie sprawdzony w rzeczywistym Foundry VTT 14 z MG i graczem.
 
 ## Obsługa i API
 
