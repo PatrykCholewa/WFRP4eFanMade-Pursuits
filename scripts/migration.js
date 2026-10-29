@@ -6,7 +6,8 @@ let pending;
 // Read saved values without registering settings for a module that is no longer installed.
 function saved(storage, key) {
   const raw = storage?.getItem(key);
-  return raw == null ? undefined : JSON.parse(raw);
+  if (raw == null) return undefined;
+  return typeof raw === 'string' ? JSON.parse(raw) : raw;
 }
 export async function migrate(game) {
   const local = game.settings.storage?.get('client');
@@ -19,16 +20,20 @@ export async function migrate(game) {
   if (!world) return;
   for (const [source, key] of [[OLD_CHASE, 'tracker'], [OLD_AUDIO, 'transport']]) {
     if (world.getItem(`${ID}.${key}`) != null) continue;
-    const value = saved(world, `${source}.${key}`);
-    if (value === undefined) continue;
+    const savedValue = saved(world, `${source}.${key}`);
+    if (savedValue === undefined) continue;
+    let value = savedValue;
     // Never resume a historical clock unexpectedly after installing the new module.
-    if (key === 'transport') { value.status = 'paused'; value.anchor = 0; }
+    if (key === 'transport') value = {...value, status: 'paused', anchor: 0};
     await game.settings.set(ID, key, value);
   }
   const oldImage = `modules/${OLD_CHASE}/assets/chase-board.svg`;
+  const newImage = `modules/${ID}/assets/chase-board.svg`;
   for (const scene of game.scenes ?? []) {
-    if (scene.background?.src === oldImage) {
-      await scene.update({'background.src': `modules/${ID}/assets/chase-board.svg`});
+    for (const level of scene.levels ?? []) {
+      if (level.background?.src === oldImage) {
+        await level.update({'background.src': newImage});
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 # WFRP4e Fan — Narzędzia
 
-Jeden moduł dla Foundry VTT 14 / WFRP4e, ID `wfrp4e-fan-tools`, wersja 0.4.2:
+Jeden moduł dla Foundry VTT 14 / WFRP4e, ID `wfrp4e-fan-tools`, wersja 0.4.3:
 
 - Plansza i tracker pościgu oraz prośby o testy, wraz z dotychczasowym kompendium makr.
 - Muzyka: ręczne przełączanie pełnych utworów przy zachowaniu wspólnego czasu, bez ich nakładania. A 13:12 → B 13:12; po 10 sekundach powrót do A 13:22.
@@ -18,14 +18,14 @@ Muzyka korzysta bezpośrednio ze zwykłych playlist Foundry. W nagłówku playli
 6. Sprawdź planszę, tracker i prośbę o rzut. Otwórz zakładkę Muzyka / Playlisty. Kliknij ikonę łańcucha w nagłówku istniejącej playlisty, a następnie jej zwykły przycisk ▶ przy utworze. Sprawdź przełączanie oraz przewijanie z połączonym graczem.
 
 Zmiana ID nie jest zwykłą aktualizacją w miejscu: nowy moduł trzeba włączyć w każdym świecie.
-Migracja naprawia standardową ścieżkę tła istniejących plansz pościgu. Zachowuje `game.wfrpChase`, więc dołączone i wcześniej zaimportowane makra nadal używają tego samego API. Stare flagi próśb o rzut pozostają czytelne.
+Migracja naprawia ścieżkę tła istniejących plansz pościgu w poziomach scen Foundry V14; otwarcie planszy uzupełnia także brakujące tło. Zachowuje `game.wfrpChase`, więc dołączone i wcześniej zaimportowane makra nadal używają tego samego API. Stare flagi próśb o rzut pozostają czytelne.
 
 Kompendium ma teraz UUID zaczynające się od `Compendium.wfrp4e-fan-tools.macros`.
 Własne linki z prefiksem `Compendium.wfrp4e-pod-bronia-poscigi.macros` trzeba poprawić ręcznie; moduł nie przepisuje treści dzienników ani własnych skryptów użytkownika. Zmodyfikowane przez użytkownika kompendium starego modułu należy wcześniej wyeksportować — paczka zawiera wersję repozytorium.
 
 Manifest aktualizacji wskazuje na bieżącą gałąź `master`, a paczka wydania jest
-publikowana w GitHub Releases. Nie deklarujemy `verified`, dopóki moduł nie
-zostanie sprawdzony w rzeczywistym Foundry VTT 14 z MG i graczem.
+publikowana w GitHub Releases. Moduł i plansza pościgu zostały ręcznie
+sprawdzone przez użytkownika w Foundry VTT 14.
 
 ## Obsługa i API
 
@@ -42,8 +42,8 @@ Najkrótszy plik określa wspólną długość pętli. Moduł nie wyrównuje tem
 
 ## Budowanie i testy
 
-`npm test` — 21 testów automatycznych; najpierw `npm ci` (LinkeDOM służy tylko testom DOM, nie jest zależnością modułu w Foundry).
+`npm test` — 24 testy automatyczne; najpierw `npm ci` (LinkeDOM służy tylko testom DOM, nie jest zależnością modułu w Foundry).
 
-`python3 tools/package-module.py` — wspólna paczka `dist/wfrp4e-fan-tools-v0.4.2.zip` z pościgami, muzyką, planszą i kompendium. GitHub Actions również buduje ZIP jako artefakt.
+`python3 tools/package-module.py` — wspólna paczka `dist/wfrp4e-fan-tools-v0.4.3.zip` z pościgami, muzyką, planszą i kompendium. GitHub Actions również buduje ZIP jako artefakt.
 
 Test integracyjny uruchamia główny skrypt modułu i obie funkcjonalności w symulowanych klientach MG/gracza. Osobne testy sprawdzają migrację, uprawnienia, zachowanie nowych danych i wspólną oś czasu. To nie jest test prawdziwego Foundry ani jakości dźwięku. Przed sesją wymagane jest sprawdzenie V14 z graczem; patrz [raport testów](docs/TEST_REPORT.md).
